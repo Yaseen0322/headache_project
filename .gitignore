@@ -1,0 +1,16 @@
+# Data (never push raw MRI data)
+data/raw/
+data/processed/
+
+# Python
+__pycache__/
+*.pyc
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Models
+models/saved_models/
+
+# OS
+.DS_Store
