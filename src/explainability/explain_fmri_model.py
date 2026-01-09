@@ -23,16 +23,28 @@ model = joblib.load(MODEL_PATH)
 print("[INFO] Loaded model and features")
 
 # SHAP explainer
+# SHAP explainer (explicit probability output)
 explainer = shap.TreeExplainer(model)
+
+# Get SHAP values for positive class (migraine = 1)
 shap_values = explainer.shap_values(X)
+
+# Handle SHAP output safely
+if isinstance(shap_values, list):
+    shap_values_migraine = shap_values[1]
+else:
+    shap_values_migraine = shap_values[:, :, 1]
 
 # ---- GLOBAL EXPLANATION ----
 plt.figure()
 shap.summary_plot(
-    shap_values[1],  # migraine class
+    shap_values_migraine,
     X,
     show=False
 )
+plt.savefig(OUT_DIR / "shap_summary.png", bbox_inches="tight")
+plt.close()
+
 plt.savefig(OUT_DIR / "shap_summary.png", bbox_inches="tight")
 plt.close()
 
@@ -41,7 +53,7 @@ print("[OK] SHAP summary plot saved")
 # ---- FEATURE IMPORTANCE ----
 importance = pd.DataFrame({
     "feature": X.columns,
-    "mean_abs_shap": abs(shap_values[1]).mean(axis=0)
+    "mean_abs_shap": abs(shap_values_migraine).mean(axis=0)
 }).sort_values(by="mean_abs_shap", ascending=False)
 
 importance.to_csv(OUT_DIR / "shap_feature_importance.csv", index=False)
